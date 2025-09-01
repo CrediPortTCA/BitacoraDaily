@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitácora Diaria de Órdenes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen py-8">
+    <div class="max-w-7xl mx-auto px-6">
+        <!-- Login/Header -->
+        <div id="loginSection" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-6">
+            <div class="text-center">
+                <h1 class="text-3xl font-semibold text-gray-900 mb-4">Bitácora Diaria de Órdenes</h1>
+                <div class="max-w-md mx-auto">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Ingresa tu nombre de usuario</label>
+                    <div class="flex space-x-3">
+                        <input type="text" id="nombreUsuario" class="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Ej: juan.perez">
+                        <button onclick="iniciarSesion()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-xl transition-colors duration-200">
+                            Iniciar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Header Principal -->
+        <div id="headerPrincipal" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-6 hidden">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-semibold text-gray-900 mb-2">Bitácora Diaria de Órdenes</h1>
+                    <p class="text-gray-600" id="fechaActual">Registro de órdenes procesadas</p>
+                    <p class="text-sm text-blue-600 font-medium" id="usuarioActual"></p>
+                </div>
+                <div class="text-right">
+                    <div class="text-sm text-gray-500">Total de órdenes hoy</div>
+                    <div class="text-3xl font-bold text-blue-600" id="totalOrdenes">0</div>
+                    <button onclick="cerrarSesion()" class="mt-2 text-sm text-red-600 hover:text-red-800 font-medium">
+                        Cerrar Sesión
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="contenidoPrincipal" class="grid lg:grid-cols-3 gap-6 hidden">
+            <!-- Formulario de Nueva Orden -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sticky top-8">
+                    <h2 class="text-xl font-medium text-gray-900 mb-6 flex items-center">
+                        <span class="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
+                        Nueva Orden
+                    </h2>
+                    
+                    <form id="formOrden" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nombre Completo del Cliente *</label>
+                            <input type="text" id="nombreCliente" required class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Ej: Juan Pérez García">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Correo Electrónico *</label>
+                            <input type="email" id="correoCliente" required class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="cliente@email.com">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Estatus de la Orden *</label>
+                            <select id="estatusOrden" required class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="">Seleccionar estatus</option>
+                                <option value="Analyst">Analyst</option>
+                                <option value="Aproveed">Aproveed</option>
+                                <option value="Canceled">Canceled</option>
+                                <option value="Down Payment">Down Payment</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Servicio *</label>
+                            <select id="tipoServicio" required class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="">Seleccionar servicio</option>
+                                <option value="Equipos">Equipos</option>
+                                <option value="Internet">Internet</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Estado de la Orden *</label>
+                            <select id="estadoOrden" required class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="">Seleccionar estado</option>
+                                <option value="Activa">Activa</option>
+                                <option value="Cancelada">Cancelada</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Prioridad</label>
+                            <select id="prioridadOrden" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="Normal">Normal</option>
+                                <option value="Alta">Alta</option>
+                                <option value="Baja">Baja</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Monto ($)</label>
+                            <input type="number" id="montoOrden" step="0.01" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0.00">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Descripción/Notas</label>
+                            <textarea id="descripcionOrden" rows="3" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none" placeholder="Detalles adicionales de la orden..."></textarea>
+                        </div>
+
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-xl transition-colors duration-200 flex items-center justify-center space-x-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            </svg>
+                            <span>Registrar Orden</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Lista de Órdenes -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-medium text-gray-900 flex items-center">
+                            <span class="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+                            Órdenes de Hoy
+                        </h2>
+                        <div class="flex space-x-3">
+                            <button onclick="exportarBitacora()" class="bg-green-600 hover:bg-green-700 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200 flex items-center space-x-2 text-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                <span>Exportar</span>
+                            </button>
+                            <button onclick="limpiarBitacora()" class="bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200 flex items-center space-x-2 text-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                                <span>Limpiar</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Buscador -->
+                    <div class="mb-6">
+                        <input type="text" id="buscador" placeholder="Buscar por cliente, correo o estatus..." class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent" oninput="filtrarOrdenes()">
+                    </div>
+
+                    <!-- Estadísticas Rápidas -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                        <div class="bg-green-50 rounded-lg p-4 text-center">
+                            <div class="text-2xl font-bold text-green-600" id="totalCompletadas">0</div>
+                            <div class="text-sm text-green-700">Activas</div>
+                        </div>
+                        <div class="bg-blue-50 rounded-lg p-4 text-center">
+                            <div class="text-2xl font-bold text-blue-600" id="totalPendientes">0</div>
+                            <div class="text-sm text-blue-700">Analyst</div>
+                        </div>
+                        <div class="bg-red-50 rounded-lg p-4 text-center">
+                            <div class="text-2xl font-bold text-red-600" id="totalProceso">0</div>
+                            <div class="text-sm text-red-700">Canceladas</div>
+                        </div>
+                        <div class="bg-purple-50 rounded-lg p-4 text-center">
+                            <div class="text-2xl font-bold text-purple-600" id="montoTotal">$0</div>
+                            <div class="text-sm text-purple-700">Total ($)</div>
+                        </div>
+                    </div>
+
+                    <!-- Tabla de Órdenes -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b border-gray-200">
+                                    <th class="text-left py-3 px-4 font-medium text-gray-700">Hora</th>
+                                    <th class="text-left py-3 px-4 font-medium text-gray-700">Cliente</th>
+                                    <th class="text-left py-3 px-4 font-medium text-gray-700">Estatus</th>
+                                    <th class="text-left py-3 px-4 font-medium text-gray-700">Servicio</th>
+                                    <th class="text-left py-3 px-4 font-medium text-gray-700">Estado</th>
+                                    <th class="text-left py-3 px-4 font-medium text-gray-700">Monto</th>
+                                    <th class="text-left py-3 px-4 font-medium text-gray-700">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaOrdenes">
+                                <tr>
+                                    <td colspan="7" class="text-center py-8 text-gray-500">
+                                        No hay órdenes registradas hoy
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let ordenes = [];
+        let contadorId = 1;
+        let usuarioActivo = null;
+
+        // Inicializar la aplicación
+        document.addEventListener('DOMContentLoaded', function() {
+            actualizarFecha();
+            verificarSesionExistente();
+            
+            // Agregar event listener para Enter en el campo de usuario
+            document.getElementById('nombreUsuario').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    iniciarSesion();
+                }
+            });
+        });
+
+        function verificarSesionExistente() {
+            const usuarioGuardado = localStorage.getItem('usuarioActivo');
+            if (usuarioGuardado) {
+                usuarioActivo = usuarioGuardado;
+                mostrarInterfazPrincipal();
+            }
+        }
+
+        function iniciarSesion() {
+            const nombreUsuario = document.getElementById('nombreUsuario').value.trim();
+            
+            if (!nombreUsuario) {
+                mostrarNotificacion('Por favor ingresa tu nombre de usuario', 'error');
+                return;
+            }
+            
+            // Validar que el nombre de usuario solo contenga letras, números, puntos y guiones
+            if (!/^[a-zA-Z0-9._-]+$/.test(nombreUsuario)) {
+                mostrarNotificacion('El nombre de usuario solo puede contener letras, números, puntos y guiones', 'error');
+                return;
+            }
+            
+            usuarioActivo = nombreUsuario.toLowerCase();
+            localStorage.setItem('usuarioActivo', usuarioActivo);
+            mostrarInterfazPrincipal();
+            mostrarNotificacion(`¡Bienvenido ${nombreUsuario}!`, 'success');
+        }
+
+        function mostrarInterfazPrincipal() {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('headerPrincipal').classList.remove('hidden');
+            document.getElementById('contenidoPrincipal').classList.remove('hidden');
+            document.getElementById('usuarioActual').textContent = `Usuario: ${usuarioActivo}`;
+            
+            // Configurar el formulario
+            document.getElementById('formOrden').addEventListener('submit', function(e) {
+                e.preventDefault();
+                registrarOrden();
+            });
+            
+            cargarOrdenes();
+        }
+
+        function cerrarSesion() {
+            if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
+                localStorage.removeItem('usuarioActivo');
+                usuarioActivo = null;
+                ordenes = [];
+                
+                document.getElementById('loginSection').classList.remove('hidden');
+                document.getElementById('headerPrincipal').classList.add('hidden');
+                document.getElementById('contenidoPrincipal').classList.add('hidden');
+                document.getElementById('nombreUsuario').value = '';
+                
+                mostrarNotificacion('Sesión cerrada', 'success');
+            }
+        }
+
+        function actualizarFecha() {
+            const ahora = new Date();
+            const opciones = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            document.getElementById('fechaActual').textContent = 
+                `Registro de órdenes del ${ahora.toLocaleDateString('es-ES', opciones)}`;
+        }
+
+        function registrarOrden() {
+            const ahora = new Date();
+            
+            const orden = {
+                id: contadorId++,
+                fecha: ahora.toLocaleDateString('es-ES'),
+                hora: ahora.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+                nombreCliente: document.getElementById('nombreCliente').value,
+                correoCliente: document.getElementById('correoCliente').value,
+                estatusOrden: document.getElementById('estatusOrden').value,
+                tipoServicio: document.getElementById('tipoServicio').value,
+                estadoOrden: document.getElementById('estadoOrden').value,
+                prioridadOrden: document.getElementById('prioridadOrden').value,
+                montoOrden: parseFloat(document.getElementById('montoOrden').value) || 0,
+                descripcionOrden: document.getElementById('descripcionOrden').value,
+                timestamp: ahora.getTime()
+            };
+
+            ordenes.push(orden);
+            guardarOrdenes();
+            actualizarTabla();
+            actualizarEstadisticas();
+            limpiarFormulario();
+            
+            // Mostrar confirmación
+            mostrarNotificacion('Orden registrada exitosamente', 'success');
+        }
+
+        function limpiarFormulario() {
+            document.getElementById('formOrden').reset();
+            document.getElementById('prioridadOrden').value = 'Normal';
+        }
+
+        function actualizarTabla() {
+            const tbody = document.getElementById('tablaOrdenes');
+            
+            if (ordenes.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center py-8 text-gray-500">
+                            No hay órdenes registradas hoy
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = ordenes.map(orden => `
+                <tr class="border-b border-gray-100 hover:bg-gray-50">
+                    <td class="py-3 px-4 text-sm">${orden.hora}</td>
+                    <td class="py-3 px-4">
+                        <div class="font-medium text-gray-900">${orden.nombreCliente}</div>
+                        <div class="text-sm text-gray-500">${orden.correoCliente}</div>
+                    </td>
+                    <td class="py-3 px-4">
+                        <div class="font-medium text-blue-600">${orden.estatusOrden}</div>
+                        <div class="text-xs text-gray-500">${obtenerPrioridadBadge(orden.prioridadOrden)}</div>
+                    </td>
+                    <td class="py-3 px-4 text-sm">${orden.tipoServicio}</td>
+                    <td class="py-3 px-4">${obtenerEstadoBadge(orden.estadoOrden)}</td>
+                    <td class="py-3 px-4 font-medium">$${orden.montoOrden.toFixed(2)}</td>
+                    <td class="py-3 px-4">
+                        <button onclick="verDetalles(${orden.id})" class="text-blue-600 hover:text-blue-800 text-sm font-medium mr-2">Ver</button>
+                        <button onclick="eliminarOrden(${orden.id})" class="text-red-600 hover:text-red-800 text-sm font-medium">Eliminar</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function obtenerEstadoBadge(estado) {
+            const colores = {
+                'Activa': 'bg-green-100 text-green-800',
+                'Cancelada': 'bg-red-100 text-red-800'
+            };
+            
+            return `<span class="px-2 py-1 text-xs font-medium rounded-full ${colores[estado] || 'bg-gray-100 text-gray-800'}">${estado}</span>`;
+        }
+
+        function obtenerPrioridadBadge(prioridad) {
+            const iconos = {
+                'Alta': '🔴',
+                'Normal': '🟢',
+                'Baja': '🔵'
+            };
+            
+            return `${iconos[prioridad] || '🟢'} ${prioridad}`;
+        }
+
+        function actualizarEstadisticas() {
+            const activas = ordenes.filter(o => o.estadoOrden === 'Activa').length;
+            const canceladas = ordenes.filter(o => o.estadoOrden === 'Cancelada').length;
+            const analyst = ordenes.filter(o => o.estatusOrden === 'Analyst').length;
+            const montoTotal = ordenes.reduce((sum, o) => sum + o.montoOrden, 0);
+
+            document.getElementById('totalOrdenes').textContent = ordenes.length;
+            document.getElementById('totalCompletadas').textContent = activas;
+            document.getElementById('totalPendientes').textContent = analyst;
+            document.getElementById('totalProceso').textContent = canceladas;
+            document.getElementById('montoTotal').textContent = `$${montoTotal.toFixed(2)}`;
+        }
+
+        function filtrarOrdenes() {
+            const termino = document.getElementById('buscador').value.toLowerCase();
+            const ordenesFiltradas = ordenes.filter(orden => 
+                orden.nombreCliente.toLowerCase().includes(termino) ||
+                orden.correoCliente.toLowerCase().includes(termino) ||
+                orden.estatusOrden.toLowerCase().includes(termino)
+            );
+            
+            // Temporalmente reemplazar ordenes para mostrar filtradas
+            const ordenesOriginales = [...ordenes];
+            ordenes = ordenesFiltradas;
+            actualizarTabla();
+            ordenes = ordenesOriginales;
+        }
+
+        function verDetalles(id) {
+            const orden = ordenes.find(o => o.id === id);
+            if (orden) {
+                alert(`
+DETALLES DE LA ORDEN
+
+Cliente: ${orden.nombreCliente}
+Correo: ${orden.correoCliente}
+Estatus: ${orden.estatusOrden}
+Servicio: ${orden.tipoServicio}
+Estado: ${orden.estadoOrden}
+Prioridad: ${orden.prioridadOrden}
+Monto: $${orden.montoOrden.toFixed(2)}
+Fecha y Hora: ${orden.fecha} ${orden.hora}
+
+Descripción:
+${orden.descripcionOrden || 'Sin descripción'}
+                `);
+            }
+        }
+
+        function eliminarOrden(id) {
+            if (confirm('¿Estás seguro de que deseas eliminar esta orden?')) {
+                ordenes = ordenes.filter(o => o.id !== id);
+                guardarOrdenes();
+                actualizarTabla();
+                actualizarEstadisticas();
+                mostrarNotificacion('Orden eliminada', 'success');
+            }
+        }
+
+        function limpiarBitacora() {
+            if (confirm('¿Estás seguro de que deseas limpiar toda la bitácora del día?')) {
+                ordenes = [];
+                contadorId = 1;
+                guardarOrdenes();
+                actualizarTabla();
+                actualizarEstadisticas();
+                mostrarNotificacion('Bitácora limpiada', 'success');
+            }
+        }
+
+        function exportarBitacora() {
+            if (!usuarioActivo) {
+                mostrarNotificacion('Debes iniciar sesión para exportar', 'error');
+                return;
+            }
+
+            if (ordenes.length === 0) {
+                mostrarNotificacion('No hay órdenes para exportar hoy', 'error');
+                return;
+            }
+
+            const ahora = new Date();
+            const fecha = ahora.toLocaleDateString('es-ES');
+            const fechaArchivo = ahora.getFullYear() + '-' + 
+                               String(ahora.getMonth() + 1).padStart(2, '0') + '-' + 
+                               String(ahora.getDate()).padStart(2, '0');
+
+            const activas = ordenes.filter(o => o.estadoOrden === 'Activa').length;
+            const canceladas = ordenes.filter(o => o.estadoOrden === 'Cancelada').length;
+            const analyst = ordenes.filter(o => o.estatusOrden === 'Analyst').length;
+            const aproveed = ordenes.filter(o => o.estatusOrden === 'Aproveed').length;
+            const downPayment = ordenes.filter(o => o.estatusOrden === 'Down Payment').length;
+            const canceled = ordenes.filter(o => o.estatusOrden === 'Canceled').length;
+            const montoTotal = ordenes.reduce((sum, o) => sum + o.montoOrden, 0);
+
+            const excelContent = `
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <style>
+                    body { font-family: 'Segoe UI', sans-serif; margin: 20px; }
+                    .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #3498db; padding-bottom: 20px; }
+                    .title { font-size: 28px; font-weight: bold; color: #2c3e50; margin-bottom: 10px; }
+                    .subtitle { color: #7f8c8d; margin-bottom: 10px; font-size: 16px; }
+                    .user-info { color: #3498db; font-weight: bold; font-size: 14px; }
+                    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin: 30px 0; }
+                    .stat-box { text-align: center; padding: 20px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 10px; border: 1px solid #dee2e6; }
+                    .stat-number { font-size: 24px; font-weight: bold; color: #2c3e50; }
+                    .stat-label { font-size: 12px; color: #6c757d; margin-top: 5px; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+                    th, td { border: 1px solid #ddd; padding: 12px; text-align: left; font-size: 13px; }
+                    th { background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: white; font-weight: bold; text-transform: uppercase; font-size: 11px; }
+                    tr:nth-child(even) { background-color: #f8f9fa; }
+                    tr:hover { background-color: #e3f2fd; }
+                    .estado-activa { background-color: #d5f4e6; color: #27ae60; font-weight: bold; }
+                    .estado-cancelada { background-color: #ffebee; color: #c62828; font-weight: bold; }
+                    .prioridad-alta { color: #e74c3c; font-weight: bold; }
+                    .prioridad-normal { color: #27ae60; }
+                    .prioridad-baja { color: #3498db; }
+                    .monto { font-weight: bold; color: #2c3e50; }
+                    .footer { margin-top: 40px; text-align: center; color: #7f8c8d; font-size: 12px; border-top: 1px solid #dee2e6; padding-top: 20px; }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <div class="title">BITÁCORA DIARIA DE ÓRDENES</div>
+                    <div class="subtitle">Reporte generado el ${fecha}</div>
+                    <div class="user-info">Usuario: ${usuarioActivo}</div>
+                </div>
+                
+                <div class="stats">
+                    <div class="stat-box">
+                        <div class="stat-number">${ordenes.length}</div>
+                        <div class="stat-label">Total Órdenes</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">${activas}</div>
+                        <div class="stat-label">Activas</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">${canceladas}</div>
+                        <div class="stat-label">Canceladas</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">${analyst}</div>
+                        <div class="stat-label">Analyst</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">${aproveed}</div>
+                        <div class="stat-label">Aproveed</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">$${montoTotal.toFixed(2)}</div>
+                        <div class="stat-label">Monto Total</div>
+                    </div>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Hora</th>
+                            <th>Cliente</th>
+                            <th>Correo Electrónico</th>
+                            <th>Estatus Orden</th>
+                            <th>Tipo Servicio</th>
+                            <th>Estado</th>
+                            <th>Prioridad</th>
+                            <th>Monto (USD)</th>
+                            <th>Descripción/Notas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${ordenes.map(orden => `
+                            <tr>
+                                <td>${orden.hora}</td>
+                                <td><strong>${orden.nombreCliente}</strong></td>
+                                <td>${orden.correoCliente}</td>
+                                <td><span style="background: #e3f2fd; padding: 4px 8px; border-radius: 4px; font-size: 11px;">${orden.estatusOrden}</span></td>
+                                <td>${orden.tipoServicio}</td>
+                                <td class="estado-${orden.estadoOrden.toLowerCase()}">${orden.estadoOrden}</td>
+                                <td class="prioridad-${orden.prioridadOrden.toLowerCase()}">${orden.prioridadOrden}</td>
+                                <td class="monto">$${orden.montoOrden.toFixed(2)}</td>
+                                <td>${orden.descripcionOrden || '-'}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+                
+                <div class="footer">
+                    <p>Reporte generado automáticamente por el Sistema de Bitácora de Órdenes</p>
+                    <p>Fecha de generación: ${new Date().toLocaleString('es-ES')}</p>
+                </div>
+            </body>
+            </html>`;
+
+            const blob = new Blob([excelContent], { type: 'application/vnd.ms-excel;charset=utf-8' });
+            const enlace = document.createElement('a');
+            const url = window.URL.createObjectURL(blob);
+            enlace.href = url;
+            enlace.download = `Bitacora_${usuarioActivo}_${fechaArchivo}.xls`;
+            
+            document.body.appendChild(enlace);
+            enlace.click();
+            document.body.removeChild(enlace);
+            window.URL.revokeObjectURL(url);
+            
+            // Guardar en historial al exportar
+            guardarEnHistorial();
+            
+            mostrarNotificacion('Bitácora exportada exitosamente', 'success');
+        }
+
+        function guardarOrdenes() {
+            if (!usuarioActivo) return;
+            
+            const fechaHoy = new Date().toDateString();
+            const claveOrdenes = `ordenes_${usuarioActivo}_${fechaHoy}`;
+            const claveContador = `contador_${usuarioActivo}_${fechaHoy}`;
+            
+            localStorage.setItem(claveOrdenes, JSON.stringify(ordenes));
+            localStorage.setItem(claveContador, contadorId.toString());
+            
+            // Guardar también en el historial del usuario
+            guardarEnHistorial();
+        }
+
+        function cargarOrdenes() {
+            if (!usuarioActivo) return;
+            
+            const fechaHoy = new Date().toDateString();
+            const claveOrdenes = `ordenes_${usuarioActivo}_${fechaHoy}`;
+            const claveContador = `contador_${usuarioActivo}_${fechaHoy}`;
+            
+            const ordenesGuardadas = localStorage.getItem(claveOrdenes);
+            const contadorGuardado = localStorage.getItem(claveContador);
+            
+            if (ordenesGuardadas) {
+                ordenes = JSON.parse(ordenesGuardadas);
+                actualizarTabla();
+                actualizarEstadisticas();
+            } else {
+                ordenes = [];
+                actualizarTabla();
+                actualizarEstadisticas();
+            }
+            
+            if (contadorGuardado) {
+                contadorId = parseInt(contadorGuardado);
+            } else {
+                contadorId = 1;
+            }
+        }
+
+        function guardarEnHistorial() {
+            if (!usuarioActivo || ordenes.length === 0) return;
+            
+            const fechaHoy = new Date().toDateString();
+            const claveHistorial = `historial_${usuarioActivo}`;
+            
+            let historial = JSON.parse(localStorage.getItem(claveHistorial) || '{}');
+            historial[fechaHoy] = {
+                ordenes: [...ordenes],
+                fecha: fechaHoy,
+                totalOrdenes: ordenes.length,
+                montoTotal: ordenes.reduce((sum, o) => sum + o.montoOrden, 0)
+            };
+            
+            localStorage.setItem(claveHistorial, JSON.stringify(historial));
+        }
+
+        function mostrarNotificacion(mensaje, tipo) {
+            // Crear notificación temporal
+            const notificacion = document.createElement('div');
+            notificacion.className = `fixed top-4 right-4 px-6 py-3 rounded-lg text-white font-medium z-50 ${
+                tipo === 'success' ? 'bg-green-500' : 'bg-red-500'
+            }`;
+            notificacion.textContent = mensaje;
+            
+            document.body.appendChild(notificacion);
+            
+            setTimeout(() => {
+                document.body.removeChild(notificacion);
+            }, 3000);
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9787e50294aa07ba',t:'MTc1Njc2MjQ5Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
